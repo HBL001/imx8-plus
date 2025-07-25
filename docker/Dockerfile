@@ -40,4 +40,10 @@ RUN apt-get update && apt-get install -y \
 RUN mkdir -p /opt/data/data_manager/{config,logs} \
     && chown -R torizon:torizon /opt/data
 
+# Disable SSHD startup (we don’t use it in VS Code)
+RUN systemctl disable ssh || true && \
+    rm -f /etc/service/sshd/run || true && \
+    sed -i '/sshd/d' /etc/inittab || true
+
+
 USER torizon

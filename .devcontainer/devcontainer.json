@@ -1,5 +1,5 @@
 {
-  "name": "Verdin Dev",
+  "name": "Verdin iMX8M Plus Dev (clotspot)",
   "image": "clotspot/verdin-dev:6.8.3",
   "remoteUser": "torizon",
   "workspaceFolder": "/home/torizon/workspace",
@@ -7,13 +7,13 @@
     "source=${localWorkspaceFolder},target=/home/torizon/workspace,type=bind"
   ],
   "settings": {
-    "terminal.integrated.defaultProfile.linux": "bash"
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "python.pythonPath": "/usr/bin/python3"
   },
   "extensions": [
     "ms-vscode.cpptools",
     "ms-vscode.cmake-tools",
     "ms-python.python"
   ],
-  "postCreateCommand": "echo 'Ready to code.'"
+  "postCreateCommand": "source /usr/local/oecore-x86_64/environment-setup-aarch64-tdx-linux || true"
 }
-
