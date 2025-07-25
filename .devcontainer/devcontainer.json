@@ -1,0 +1,19 @@
+{
+  "name": "Verdin Dev",
+  "image": "clotspot/verdin-dev:6.8.3",
+  "remoteUser": "torizon",
+  "workspaceFolder": "/home/torizon/workspace",
+  "mounts": [
+    "source=${localWorkspaceFolder},target=/home/torizon/workspace,type=bind"
+  ],
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "extensions": [
+    "ms-vscode.cpptools",
+    "ms-vscode.cmake-tools",
+    "ms-python.python"
+  ],
+  "postCreateCommand": "echo 'Ready to code.'"
+}
+
