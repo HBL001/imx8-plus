@@ -1,10 +1,19 @@
-
 #
 # (c) 2025 Highland Biosciences Limited - Scotland
 #
-# Bringup Test Harness for I2C-1 on the imx8x Plus
+# Dr Richard Day
 #
-# build me: docker build -t clotspot/verdin-i2c-gpio:latest -f Dockerfile .
+# Extended Developer Container for Verdin iMX8M Plus
+# Includes: I2C, GPIO, USB, dev tools, Python, debugging
+#
+# Build: docker build -t clotspot/verdin-devtools:latest -f Dockerfile .
+#
+# Run it: docker run -it --rm \
+#  -v /dev:/dev \
+#  --device-cgroup-rule='c 89:* rmw' \
+#  --privileged \
+#  --network host \
+#  clotspot/verdin-devtools:latest
 #
 #
 
@@ -20,11 +29,22 @@ RUN apt-get update && apt-get install -y \
     libgpiod2 \
     libgpiod-dev \
     gpiod \
+    usbutils \
+    pciutils \
+    vim \
+    less \
+    htop \
+    curl \
+    net-tools \
+    iputils-ping \
+    git \
+    sudo \
+    build-essential \
+    cmake \
     && apt-get clean
 
-# Ensure 'python' points to 'python3'
+# Optional: symlink python -> python3
 RUN ln -sf /usr/bin/python3 /usr/bin/python
 
-# Default command
+# Default shell
 CMD [ "bash" ]
-
