@@ -1,7 +1,11 @@
 #
 # Dockerfile for Verdin iMX8M Plus (TorizonCore 6.8.3)
-# Qt5 + CMake cross-compilation + Python tools
-# (C) Richard Day – Highland Biosciences – DuoSight Project
+# C++ cross-compilation (no Qt) with SDL2 + OpenGL ES support
+# (c) 2025 Richard Day – Highland Biosciences – DuoSight Project
+# 
+# Version 0.4 
+#
+# Fixed:  Free and non-free split
 #
 
 FROM torizon/cross-toolchain-arm64-imx8:4.6
@@ -12,50 +16,53 @@ ENV HOME=/home/torizon
 ENV USER=torizon
 ENV USE_CCACHE=1
 ENV CCACHE_DIR=/home/torizon/.ccache
-ENV QT_QPA_PLATFORM=wayland
 ENV DISPLAY=:0
 
 WORKDIR /home/torizon
 
-# Enable aarch64 architecture and update package lists
-RUN dpkg --add-architecture arm64 && \
-    apt-get update
+# ✅ Fix Bookworm non-free split
+RUN echo "deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware" > /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware" >> /etc/apt/sources.list && \
+    echo "deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware" >> /etc/apt/sources.list
 
-# Install Qt5 (GLES build), dev tools, and extra build essentials
-RUN apt-get install -y \
-    qtbase5-dev:arm64 \
-    qtbase5-dev-tools:arm64 \
-    qttools5-dev-tools:arm64 \
-    qt5-qmake:arm64 \
-    libqt5gui5:arm64 \
-    libqt5core5a:arm64 \
-    libgles-dev:arm64 \
-    libqt5widgets5:arm64 \
+# ✅ Enable arm64 architecture and install cross-build dependencies
+RUN dpkg --add-architecture arm64 && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libsdl2-dev:arm64 \
+    libgles2-mesa-dev:arm64 \
+    libegl1-mesa-dev:arm64 \
+    libwayland-dev:arm64 \
+    libxkbcommon-dev:arm64 \
+    libinput-dev:arm64 \
+    libdrm-dev:arm64 \
+    libudev-dev:arm64 \
+    libexpat1-dev:arm64 \
+    libpng-dev:arm64 \
     cmake \
     make \
-    git \
     g++ \
+    git \
     pkg-config \
     rsync \
     vim \
     tmux \
     tree \
     locales \
-    sudo \
-    python3 \
-    python3-pip \
-    python3-numpy \
-    python3-matplotlib \
- && apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+    sudo && \
+    apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Optional data directories for runtime use
-RUN mkdir -p /opt/data/data_manager/{config,logs} \
-    && chown -R torizon:torizon /opt/data
+# Optional: workspace directory for development
+RUN mkdir -p /opt/data/data_manager/{config,logs} && \
+    chown -R torizon:torizon /opt/data
 
-# Disable SSH server inside the container
+# Disable sshd (not needed in devcontainer)
 RUN systemctl disable ssh || true && \
     rm -f /etc/service/sshd/run || true && \
     sed -i '/sshd/d' /etc/inittab || true
 
-USER torizon
+# Grant sudo access to torizon user
+RUN echo 'torizon ALL=(ALL) NOPASSWD:ALL' > /etc/sudoers.d/torizon && \
+    chmod 0440 /etc/sudoers.d/torizon
 
+USER torizon

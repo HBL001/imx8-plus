@@ -1,50 +1,33 @@
-#
-# (c) 2025 Highland Biosciences Limited - Scotland
-#
-# Dr Richard Day
-#
-# Extended Developer Container for Verdin iMX8M Plus
-# Includes: I2C, GPIO, USB, dev tools, Python, debugging
-#
-# Build: docker build -t clotspot/verdin-devtools:latest -f Dockerfile .
-#
-# Run it: docker run -it --rm \
-#  -v /dev:/dev \
-#  --device-cgroup-rule='c 89:* rmw' \
-#  --privileged \
-#  --network host \
-#  clotspot/verdin-devtools:latest
-#
-#
-
 FROM torizon/debian-imx8:4
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Install system tools and build dependencies
 RUN apt-get update && apt-get install -y \
     i2c-tools \
+    spi-tools \
     python3 \
+    python3-venv \
     python3-pip \
-    python3-periphery \
-    libgpiod2 \
-    libgpiod-dev \
-    gpiod \
-    usbutils \
-    pciutils \
-    vim \
-    less \
-    htop \
-    curl \
-    net-tools \
-    iputils-ping \
-    git \
-    sudo \
+    python3-dev \
     build-essential \
-    cmake \
-    && apt-get clean
+    strace \
+    gpiod \
+    bsdmainutils \
+    less \
+    vim && \
+    apt-get clean
 
-# Optional: symlink python -> python3
-RUN ln -sf /usr/bin/python3 /usr/bin/python
+# Create a clean Python venv
+RUN python3 -m venv /opt/iotenv
 
-# Default shell
-CMD [ "bash" ]
+# Install Python packages inside venv
+RUN /opt/iotenv/bin/pip install --no-cache-dir smbus2 spidev
+
+# Optional: create convenience aliases
+RUN ln -s /opt/iotenv/bin/python /usr/local/bin/pyiot && \
+    ln -s /opt/iotenv/bin/pip /usr/local/bin/pipiot && \
+    ln -s /opt/iotenv/bin/activate /usr/local/bin/activate-iotenv
+
+WORKDIR /home/torizon
+CMD ["bash"]
